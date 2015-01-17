@@ -1,0 +1,70 @@
+---
+title: "Barbell Lift Classification"
+author: "Michael Ching"
+date: "January 12, 2015"
+output: html_document
+---
+```{r, cache=TRUE}
+library(RCurl)
+url_train <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+url_test <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+timestamp()
+x <- getURL(url_train)
+train <- read.csv(textConnection(x), na.strings = c("NA", "#DIV/0!"))
+x <- getURL(url_test)
+test <- read.csv(textConnection(x), na.strings = c("NA", "#DIV/0!"))
+rm(x)
+```
+
+Exploring Data
+```{r}
+library(caret); library(randomForest)
+table(train$classe)
+# classe has 5 values, A, B, C, D, E
+
+summary(train)
+# X is the index and carries no info. user_name could have some info.
+# timestamps might not be useful. Not clear what window means, but 
+# we can leave it in for now.
+
+```
+
+Further split of training into training and validation samples.
+```{r}
+# Split train set into train and probe sets
+set.seed(1234)
+inTrain <- createDataPartition(y=train$classe, p=0.7, list=FALSE)
+train <- train[inTrain,]
+probe <- train[-inTrain,]
+```
+
+Need to remove columns with missing values
+
+```{r}
+train_no_NAs <- sapply(train, function(x) !any(is.na(x)))
+train_complete <- train[, train_no_NAs]
+```
+
+Model creation
+```{r}
+set.seed(96825)
+modfit <- randomForest(classe ~ ., data = train_complete[, -1])
+print(modfit)
+```
+
+Estimating out of sample error rate
+```{r}
+# Error rate in training data
+predtrain <- predict(modfit, train_complete)
+table(predtrain, train_complete$classe)
+
+# Error rate in validation data
+predprobe <- predict(modfit, probe)
+table(predprobe, probe$classe)
+```
+
+Predictions on test data
+```{r}
+predtest <- predict(modfit, test)
+print(predtest)
+```
