@@ -48,18 +48,21 @@ train_complete <- train[, train_no_NAs]
 
 # Model Creation
 To create the classification model, I used the `randomForest` procedure from the `randomForest` package. I elected not to use the first 7 features since they did not contain data that I felt would be relevant to prediction. That is, the row number, timestamps, subject ID, and whether it was the first observation of a new window of observations.
+
 ```{r, cache = TRUE}
 set.seed(96825)
 modfit <- randomForest(classe ~ ., data = train_complete[, -(1:7)])
 ```
 
 # Cross Validation and Estimating Out of Sample Error Rate
-The estimate of out of sample error rate is calculated internally via bootstrapping. That is, each tree is constructed from a random sample of the data (approximately 2/3 of the data). Each of the remaining left-out observations are predicted using the tree, and the probability of being in the most common "out of bag" category after the model is complete results in the out-of-bag error estimate of .
+The estimate of out of sample error rate is calculated internally via bootstrapping. That is, each tree is constructed from a random sample of the data (approximately 2/3 of the data). Each of the remaining left-out observations are predicted using the tree, and the probability of being in the most common "out of bag" category after the model is complete results in the out-of-bag error estimate of `r round(modfit$err.rate[nrow(modfit$err.rate)] * 100, 2)`. (Reference: https://www.stat.berkeley.edu/~breiman/RandomForests/cc_home.htm)
 
 ```{r}
 print(modfit)
 ```
 
+# Confusion Matrix
+I estimated the accuracy of the model in predicting the class of barbell exercise by construction confusion matrices. Two matrices were generated, one for predictions on the training data and one for predictions on the validation data.
 ```{r}
 # Error rate in training data
 predtrain <- predict(modfit, train_complete)
@@ -70,7 +73,9 @@ predprobe <- predict(modfit, probe)
 confusionMatrix(predtrain, train_complete$classe)
 ```
 
-Predictions on test data
+# Predictions on Test Data
+Finally I used the model to predict the class for each of the test observations.
+
 ```{r}
 predtest <- predict(modfit, test)
 print(predtest)
