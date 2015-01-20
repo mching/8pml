@@ -62,10 +62,10 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 
 <div id="summary" class="section level1">
 <h1>Summary</h1>
-<p>This manuscript describes the process of classifying dumbbell lifts into different categories based on automated sensor data. A machine learning model was created using the random forests algorithm. Accuracy approached 100%, and the out of sample error rate was estimated to be 0.1%.</p>
+<p>This manuscript describes the process of classifying dumbbell lifts into different categories of how well the exercise was performed based on automated sensor data. A machine learning model was created using the random forests algorithm. Accuracy approached 100%, and the out of sample error rate was estimated to be 0.1%.</p>
 <div id="data-source" class="section level2">
 <h2>Data Source</h2>
-<p>Data were collected by Velloso et al. (2013), available here: <a href="http://groupware.les.inf.puc-rio.br/har">http://groupware.les.inf.puc-rio.br/har</a>. I downloaded the data from the Coursera links as below.</p>
+<p>Data were collected by Velloso et al. (2013), available here: <a href="http://groupware.les.inf.puc-rio.br/har">http://groupware.les.inf.puc-rio.br/har</a>. As described on the website: “Six young health participants were asked to perform one set of 10 repetitions of the Unilateral Dumbbell Biceps Curl in five different fashions: exactly according to the specification (Class A), throwing the elbows to the front (Class B), lifting the dumbbell only halfway (Class C), lowering the dumbbell only halfway (Class D) and throwing the hips to the front (Class E).” I downloaded the data from the Coursera links as below.</p>
 <pre class="r"><code>library(RCurl)</code></pre>
 <pre><code>## Loading required package: bitops</code></pre>
 <pre class="r"><code>url_train &lt;- &quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv&quot;
@@ -100,7 +100,7 @@ train_complete &lt;- train[, train_no_NAs]</code></pre>
 </div>
 <div id="model-creation" class="section level2">
 <h2>Model Creation</h2>
-<p>To create the classification model, I used the <code>randomForest</code> procedure from the <code>randomForest</code> package. I elected not to use the first 7 features since they did not contain data that I felt would be relevant to prediction. That is, the row number, timestamps, subject ID, and whether it was the first observation of a new window of observations.</p>
+<p>To create the classification model, I used the <code>randomForest</code> function from the <code>randomForest</code> package. I elected not to use the first 7 features since they did not contain data that I felt would be relevant to prediction. That is, the row number, timestamps, subject ID, and whether it was the first observation of a new window of observations.</p>
 <pre class="r"><code>set.seed(96825)
 modfit &lt;- randomForest(classe ~ ., data = train_complete[, -(1:7)])</code></pre>
 </div>
@@ -126,43 +126,10 @@ modfit &lt;- randomForest(classe ~ ., data = train_complete[, -(1:7)])</code></p
 </div>
 <div id="confusion-matrix" class="section level2">
 <h2>Confusion Matrix</h2>
-<p>I estimated the accuracy of the model in predicting the class of barbell exercise by construction confusion matrices. Two matrices were generated, one for predictions on the training data and one for predictions on the validation data.</p>
-<pre class="r"><code># Error rate in training data
-predtrain &lt;- predict(modfit, train_complete)
-confusionMatrix(predtrain, train_complete$classe)</code></pre>
-<pre><code>## Confusion Matrix and Statistics
-## 
-##           Reference
-## Prediction    A    B    C    D    E
-##          A 3906    0    0    0    0
-##          B    0 2658    0    0    0
-##          C    0    0 2396    0    0
-##          D    0    0    0 2252    0
-##          E    0    0    0    0 2525
-## 
-## Overall Statistics
-##                                 
-##                Accuracy : 1     
-##                  95% CI : (1, 1)
-##     No Information Rate : 0.284 
-##     P-Value [Acc &gt; NIR] : &lt;2e-16
-##                                 
-##                   Kappa : 1     
-##  Mcnemar's Test P-Value : NA    
-## 
-## Statistics by Class:
-## 
-##                      Class: A Class: B Class: C Class: D Class: E
-## Sensitivity             1.000    1.000    1.000    1.000    1.000
-## Specificity             1.000    1.000    1.000    1.000    1.000
-## Pos Pred Value          1.000    1.000    1.000    1.000    1.000
-## Neg Pred Value          1.000    1.000    1.000    1.000    1.000
-## Prevalence              0.284    0.193    0.174    0.164    0.184
-## Detection Rate          0.284    0.193    0.174    0.164    0.184
-## Detection Prevalence    0.284    0.193    0.174    0.164    0.184
-## Balanced Accuracy       1.000    1.000    1.000    1.000    1.000</code></pre>
-<pre class="r"><code># Error rate in validation data
-predprobe &lt;- predict(modfit, probe)
+<p>I estimated the accuracy of the model in predicting the class of barbell exercise by constructing confusion matrices. Two matrices were generated, one for predictions on the training data and one for predictions on the validation data.</p>
+<div id="training-sample-prediction" class="section level3">
+<h3>Training Sample Prediction</h3>
+<pre class="r"><code>predtrain &lt;- predict(modfit, train_complete)
 confusionMatrix(predtrain, train_complete$classe)</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
@@ -196,6 +163,43 @@ confusionMatrix(predtrain, train_complete$classe)</code></pre>
 ## Detection Prevalence    0.284    0.193    0.174    0.164    0.184
 ## Balanced Accuracy       1.000    1.000    1.000    1.000    1.000</code></pre>
 </div>
+<div id="validation-sample-prediction" class="section level3">
+<h3>Validation Sample Prediction</h3>
+<pre class="r"><code>predprobe &lt;- predict(modfit, probe)
+confusionMatrix(predtrain, train_complete$classe)</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction    A    B    C    D    E
+##          A 3906    0    0    0    0
+##          B    0 2658    0    0    0
+##          C    0    0 2396    0    0
+##          D    0    0    0 2252    0
+##          E    0    0    0    0 2525
+## 
+## Overall Statistics
+##                                 
+##                Accuracy : 1     
+##                  95% CI : (1, 1)
+##     No Information Rate : 0.284 
+##     P-Value [Acc &gt; NIR] : &lt;2e-16
+##                                 
+##                   Kappa : 1     
+##  Mcnemar's Test P-Value : NA    
+## 
+## Statistics by Class:
+## 
+##                      Class: A Class: B Class: C Class: D Class: E
+## Sensitivity             1.000    1.000    1.000    1.000    1.000
+## Specificity             1.000    1.000    1.000    1.000    1.000
+## Pos Pred Value          1.000    1.000    1.000    1.000    1.000
+## Neg Pred Value          1.000    1.000    1.000    1.000    1.000
+## Prevalence              0.284    0.193    0.174    0.164    0.184
+## Detection Rate          0.284    0.193    0.174    0.164    0.184
+## Detection Prevalence    0.284    0.193    0.174    0.164    0.184
+## Balanced Accuracy       1.000    1.000    1.000    1.000    1.000</code></pre>
+</div>
+</div>
 <div id="predictions-on-test-data" class="section level2">
 <h2>Predictions on Test Data</h2>
 <p>Finally I used the model to predict the class for each of the test observations.</p>
@@ -204,6 +208,16 @@ print(predtest)</code></pre>
 <pre><code>##  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 
 ##  B  A  B  A  A  E  D  B  A  A  B  C  B  A  E  E  A  B  B  B 
 ## Levels: A B C D E</code></pre>
+<p>I output these answers into text files for grading.</p>
+<pre class="r"><code>pml_write_files = function(x){
+    n = length(x)
+    for(i in 1:n){
+        filename = paste0(&quot;./answers/problem_id_&quot;,i,&quot;.txt&quot;)
+        write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
+    }
+}
+
+pml_write_files(predtest)</code></pre>
 </div>
 </div>
 
