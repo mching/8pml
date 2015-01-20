@@ -1,0 +1,6 @@
+.Rproj.user
+.Rhistory
+.RData
+barbell_cache/
+*.Rproj
+*.Rdata
